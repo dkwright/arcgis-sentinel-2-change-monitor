@@ -1,0 +1,2 @@
+# arcgis-sentinel-2-change-monitor
+This project uses ArcGIS, and the Sentinel-2 L2A data from AWS Open Datasets to automate the creation and updating of time-enabled Mosaic Datasets, conduct change analysis, and publishing or updating image services. A significant part of the project is based on prior work by Esri using Mosaic Dataset Configuration Script (MDCS) in support of Digital Earth Africa. Details on the requirements, setup, and operation of MDCS is covered in the documentation of that repository https://github.com/Esri/mdcs-py
