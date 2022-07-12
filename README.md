@@ -30,10 +30,15 @@ For a quicket start, clone this repository into this local path: "C:\Image_Mgmt_
 ### Contains a JSON template for publishing new image services:
     * rest-create-service-s2l2a-template.json
 This template was built using ArcGIS Image Server version 10.9.1 (the latest release of Image Server at the time of creating this repository), and has only been tested with version 10.9.1.
-Please note: You will need to edit the valee for the "userName" item in this JSON template before running the code."
-"userName": "changemonitor_myorg"
-replace "changemon_myorg" with a username in your ArcGIS Enterprise environment with Publisher privileges. This username will be the owner of the published / modified services.
-
+Please note: You will need to edit some values in this JSON template before running the code."
+    * "userName": "changemonitor_myorg" 
+Replace "changemon_myorg" with a username in your ArcGIS Enterprise environment with Publisher privileges. This username will be the owner of the published / modified services.
+    * "portalURL": "https://cname.domain/portal/" 
+Replace https://cname.domain/portal/ with your actual portal URL (e.g https://remotesensing.imagery.esri.com/portal/)
+    The onlineResource for WMSServer and WCSServer OGC Extensions will also need to have the base domain edited with just the https://cname.domain/ part of your site URL. Note that MYSERVICENAME (GDBNAME, and MDNAME too!) are already being substituted automatically by the code.
+    * "onlineResource": "**https://cname.domain**/image/services/change_monitor/MYSERVICENAME/ImageServer/WCSServer"
+    * "onlineResource": "**https://cname.domain**/image/services/change_monitor/MYSERVICENAME/ImageServer/WMSServer"
+    
 ## Additional Requirements:
 ### Access to the Sentinel-2 Data STAC catalog requires installation of the sat-search Python module
 pip install sat-search
