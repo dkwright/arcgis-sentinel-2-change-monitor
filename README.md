@@ -1,5 +1,5 @@
 # arcgis-sentinel-2-change-monitor
-This project was presented at the Esri 2022 Imagery Summit (slides included as Esri_ImagerySummit2022_ChangeMonitoring_Demo.pdf). The project uses an ArcGIS feature service as the control for an automated change monitoring solution using Sentinel-2 L2A data from AWS Open Datasets. Operators manage polygons and attributes in the feature service to define where and when Sentinel-2 imagery is needed for analysis. 
+This project was presented at the Esri 2022 Imagery Summit (slides included as Esri_ImagerySummit2022_ChangeMonitoring_Demo.pdf). The project uses an ArcGIS feature service as the control for an automated change monitoring solution using Sentinel-2 L2A data from AWS Open Datasets (via STAC). Operators manage polygons and attributes in the feature service to define where and when Sentinel-2 imagery is needed for analysis. 
 
 ## Creating the Feature Service:
 ### the "ChangeMonitoringControls_FC" subdirectory includes a File GeoDataBase Sentinel_2_L2A_Monitoring.gdb. Inside the GeoDataBsae is a polygon feature class
@@ -30,3 +30,7 @@ For a quicket start, clone this repository into this local path: "C:\Image_Mgmt_
 ### Contains a JSON template for publishing new image services:
     * rest-create-service-s2l2a-template.json
 This template was built using ArcGIS Image Server version 10.9.1 (the latest release of Image Server at the time of creating this repository), and has only been tested with version 10.9.1.
+
+## Additional Requirements:
+### Access to the Sentinel-2 Data STAC catalog requires installation of the sat-search Python module
+pip install sat-search
