@@ -2,7 +2,7 @@
 This project was presented at the Esri 2022 Imagery Summit (slides included as Esri_ImagerySummit2022_ChangeMonitoring_Demo.pdf). The project uses an ArcGIS feature service as the control for an automated change monitoring solution using Sentinel-2 L2A data from AWS Open Datasets (via STAC). Operators manage polygons and attributes in the feature service to define where and when Sentinel-2 imagery is needed for analysis. 
 
 ## Creating the Feature Service:
-### the "ChangeMonitoringControls_FC" subdirectory includes a File GeoDataBase Sentinel_2_L2A_Monitoring.gdb. Inside the GeoDataBsae is a polygon feature class
+### the "ChangeMonitoringControls_FC" subdirectory includes a ZIP compressed File GeoDataBase Sentinel_2_L2A_Monitoring.gdb. Inside the GeoDataBsae is a polygon feature class
     * Publish this feature class as an editable feature service
     * Share with collaborators using a Webmap, a Webapp, or ArcGIS Pro
     * Record the item guid after publishing for reference in python code listed below
