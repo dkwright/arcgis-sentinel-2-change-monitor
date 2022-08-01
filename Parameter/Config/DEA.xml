@@ -69,10 +69,12 @@
 				<cell_size>#</cell_size>
 				<metadata_level>BASIC</metadata_level>
 				<transmission_fields>Name;MinPS;MaxPS;LowPS;HighPS;ProductName;AcquisitionDate;CloudCover;Best</transmission_fields>
-				<use_time>DISABLED</use_time>
-				<start_time_field>acquisitiondate</start_time_field>
-				<end_time_field>acquisitiondate</end_time_field>
-				<time_format>#</time_format>
+				<use_time>ENABLED</use_time>
+				<start_time_field>DayDate</start_time_field>
+				<end_time_field>DayDate</end_time_field>
+				<time_format>YYYY/MM/DD</time_format>
+				<time_interval_units>DAYS</time_interval_units>
+				<time_interval>1</time_interval>
 				<geographic_transform>#</geographic_transform>
 				<max_num_of_download_items>50</max_num_of_download_items>
 				<max_num_of_records_returned>2000</max_num_of_records_returned>

@@ -1,23 +1,26 @@
-# # Automated Change Monitoring with Sentinel-2 L2A
+# Automated Change Monitoring with Sentinel-2 L2A
 
-# ## 01 - Manage Mosiac Dataset(s) with Sentinel-2 Imagery for specified area, date range, and cloud cover threshold
+# 01 - Manage Mosiac Dataset(s) with Sentinel-2 Imagery for specified area, date range, and cloud cover threshold
 
-# #### Connect to the ArcGIS Online organization
+# Connect to the ArcGIS Online organization
 from arcgis import GIS
 from arcgis.features import FeatureLayerCollection
 import getpass
 from arcgis.raster.analytics import copy_raster
 
+# Local dir to create Mosaic Dataset(s) 
+local_md_dir = r"C:\data\Sentinel-2-l2a\change_monitor"
+
+# ArcGIS Enterprise variables
 org_url = "https://cname.domain/portal"
 uname = "your_username"
 pw = "your_password"
+feature_service_item = "the GUID for your Sentinel-2 L2A Monitoring Controls Feature Service item" # The Monitoring specification Feature Service
 gis = GIS(org_url, uname, pw, verify_cert=False)
-
-# #### Load the Monitoring specification Feature Service
-monitoring_aois_item = gis.content.get("the GUID for your Sentinel-2 L2A Monitoring Controls Feature Service") #IRS Enterprise
+monitoring_aois_item = gis.content.get(feature_service_item)
 monitoring_aois_item
 
-# #### Access the layer and query it for the active AOIs
+# Access the layer and query it for the active AOIs
 monitoring_aois_layers = monitoring_aois_item.layers
 monitoring_aois_layer = monitoring_aois_layers[0]
 
@@ -25,7 +28,7 @@ active_aois = monitoring_aois_layer.query(where="Active='True'",
                                           out_fields='name,description,active,startdate,enddate,lastmoddate,cloudcoverpct,notify,contactemail,imageservice,changeimageservice')
 active_aois.sdf
 
-# ## Execute Mosaic Dataset Configuration Script to create / update Mosaic Dataset for each active AOI
+# Execute Mosaic Dataset Configuration Script to create / update Mosaic Dataset for each active AOI
 import MDCS
 from os import makedirs
 from os.path import join, abspath, dirname, exists
@@ -36,7 +39,7 @@ for feature in active_aois:
 
     today = date.today()
     
-    # if EndDate is null we assume it should always be run into the future
+    # If EndDate is null we assume it should always be run into the future
     if feature.attributes["enddate"] != None:
         enddate_fmt = date.fromtimestamp(feature.attributes["enddate"] / 1e3)
         enddate = enddate_fmt.strftime("%Y-%m-%d")
@@ -64,10 +67,12 @@ for feature in active_aois:
     args = ['#gprun']
     
     gdb_name = feature.attributes["name"]
+    interval = 1
     
-    if not exists(r"C:\data\Sentinel-2-l2a\change_monitor"):
-        makedirs(r"C:\data\Sentinel-2-l2a\change_monitor")
-    base_path = f"C:\data\Sentinel-2-l2a\change_monitor\{gdb_name}.gdb"
+    if not exists(local_md_dir):
+        makedirs(local_md_dir)
+    base_path = join(local_md_dir, gdb_name + ".gdb")
+
     full_path = '-m:' + join(base_path, gdb_name)
     
     config = "-i:" + r"..\Parameter\Config\DEA.xml"
@@ -82,6 +87,7 @@ for feature in active_aois:
     args.append("-p:{0}$coordinate".format(aoi))
     #args.append("-p:{0}$aoisrs".format(aoisrs))
     args.append("-p:{0}$cloud".format(cloudcover))
+    args.append("-p:{0}$interval".format(interval))
     args.append(cmd)
 
     #messages.addMessage(time.ctime())
@@ -101,12 +107,12 @@ for feature in active_aois:
         
     if update:
         print("New rasters have been added to this Mosaic Dataset.")
-        # update the feature's LastModDate attribute with the current datetime stamp
+        # Update the feature's LastModDate attribute with the current datetime stamp
         monitoring_aois_layer.calculate(where=f"name='{gdb_name}'", calc_expression={"field":"lastmoddate", "value": datetime.now()})
 
         if feature.attributes["notify"] == "True":
             print("Notifications are set to active for: " + feature.attributes["contactemail"])
-            # notify by email to feature.attributes["ContactEmail"]
+            # Notify by email to feature.attributes["ContactEmail"]
         else:
             print("Notifications are not active for this AOI.")
     

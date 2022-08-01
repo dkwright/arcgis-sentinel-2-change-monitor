@@ -1,23 +1,33 @@
-# # Automated Change Monitoring with Sentinel-2 L2A
+# Automated Change Monitoring with Sentinel-2 L2A
 
-# ## 02 - Manage Image Services
+# 02 - Manage Image Services
 
-# #### Connect to the ArcGIS Online organization
+# Connect to the ArcGIS Online organization
 from arcgis import GIS
 from arcgis.features import FeatureLayerCollection
 import getpass
 from arcgis.raster.analytics import copy_raster
+from os.path import join
 
+# Local dir to create Mosaic Dataset(s) 
+local_md_dir = r"C:\data\Sentinel-2-l2a\change_monitor"
+
+# Image Hosting file server variables for copying the Mosiac Datasets to
+username_hostname = "arcgis@host.mydomain.com"
+server_filepath = "/net/10.0.0.89/gisdata/arcgisserver/raster/sentinel-2-l2a/change_monitor/"
+private_key_file =  r"C:\Users\username\.ssh\private_key_for_hostname\id_rsa"
+
+# ArcGIS Enterprise variables
 org_url = "https://cname.domain/portal"
 uname = "your_username"
 pw = "your_password"
+image_url = "https://cname.domain/image" # Federated Image Hosting Site
+feature_service_item = "the GUID for your Sentinel-2 L2A Monitoring Controls Feature Service item" # The Monitoring specification Feature Service
 gis = GIS(org_url, uname, pw, verify_cert=False)
-
-# #### Load the Monitoring specification Feature Service
-monitoring_aois_item = gis.content.get("the GUID for your Sentinel-2 L2A Monitoring Controls Feature Service") #IRS Enterprise
+monitoring_aois_item = gis.content.get(feature_service_item) #IRS Enterprise
 monitoring_aois_item
 
-# #### Access the layer and query it for the active AOIs
+# Access the layer and query it for the active AOIs
 monitoring_aois_layers = monitoring_aois_item.layers
 monitoring_aois_layer = monitoring_aois_layers[0]
 
@@ -25,7 +35,7 @@ active_aois = monitoring_aois_layer.query(where="Active='True'",
                                           out_fields='name,description,active,startdate,enddate,lastmoddate,cloudcoverpct,notify,contactemail,imageservice,changeimageservice')
 active_aois.sdf
 
-# ### Copy Mosiac Dataset(s) to Image Hosting File Server
+# Copy Mosiac Dataset(s) to Image Hosting File Server
 
 # This method transfers the File GeoDataBase to a Linux File Server configured with the Image Hosting Site. 
 # Note that a Folder Datastore was configured using the Image Server Manager allow data access to the 
@@ -44,8 +54,13 @@ for feature in active_aois:
     gdb_name = feature_name + "_" + datetime.utcfromtimestamp(feature.attributes["lastmoddate"] / 1000).strftime("%m_%d_%Y_%H_%M_%S")
     md_name = feature_name
     print(f"Copying File GeoDataBase to server: {gdb_name}")
-    print(f"C:\data\sentinel-2-l2a\change_monitor\{gdb_name}.gdb")
-        
+    print(join(local_md_dir, gdb_name + ".gdb"))
+    
+    # The line below needs to be configured with the operator's own id_rsa key, and Image Hosting server path for storing Mosaic Datasets.
+    # The pattern shown here makes use of a file server that is used by the Image Server nodes in the site. 
+    # Path on the file server is /net/10.0.0.89/gisdata/arcgisserver/raster/sentinel-2-l2a/change_monitor/
+    gdb_copy_result = subprocess.run(["scp", "-C", "-i", private_key_file, "-r", join(local_md_dir, feature_name + ".gdb"), username_hostname + ":" + server_filepath + gdb_name + ".gdb"])
+    
     if gdb_copy_result.returncode == 0:
         print(f"File GeoDataBase {gdb_name} copied successfully to Image Hosting File Server.")
     else:
@@ -97,13 +112,12 @@ def get_token_referer(username,password,portal_url,server_url,referer):
             return False
 
 
-# #### Connect to ArcGIS Enterprise and generate token
-portal_url = org_url # "https://cname.domain/portal"
-image_url = "https://cname.domain/image" # Federated Image Hosting Site
+# Connect to ArcGIS Enterprise and generate token
+portal_url = org_url
 portal_token = get_token_referer(uname,pw,portal_url,image_url,portal_url + '/sharing/rest')
 image_token = get_token_referer(uname,pw,portal_url,image_url,image_url)
 
-# funtion to publish a new Image Service to Image Server using admin REST
+# Function to publish a new Image Service to Image Server using admin REST
 def publish_image_service(service_name, service_json):
     url = '{}/admin/services/change_monitor/createService'.format(image_url)
     payload = {"service": json.dumps(service_json)}
@@ -116,7 +130,7 @@ def publish_image_service(service_name, service_json):
 
     return resp
 
-# funtion to edit an existing Image Service using admin REST
+# Function to edit an existing Image Service using admin REST
 def edit_image_service(service_name, service_json):
     url = '{0}/admin/services/change_monitor/{1}.ImageServer/edit?'.format(image_url, service_name)
     payload = {"service": json.dumps(service_json)}
@@ -129,7 +143,7 @@ def edit_image_service(service_name, service_json):
 
     return resp
 
-# funtions to mange service JSON from a template or from an existing service
+# Functions to manage service JSON from a template or from an existing service
 def update_service_path(current_path, new_gdb_md, md_name):
     gdb_path = current_path.rsplit('\\', 1)[0]
     path = gdb_path.rsplit('\\', 1)[0]
@@ -139,7 +153,7 @@ def update_service_path(current_path, new_gdb_md, md_name):
 
 def create_service_json(service_name, service_exists, gdb_name, md_name):
     if not service_exists:
-        # read JSON from a template
+        # Read JSON from a template
         with open(r"service_mgmt\\rest-create-service-s2l2a-template.json", "r") as template_file:
             data = template_file.read()
         obj = loads(data)
@@ -150,7 +164,7 @@ def create_service_json(service_name, service_exists, gdb_name, md_name):
         md_replaced = dumps(obj3).replace("MDNAME", md_name)
         service_json = loads(md_replaced)
     else:
-        # read the existing JSON from the service
+        # Read the existing JSON from the service
         url = '{0}/admin/services/change_monitor/{1}.ImageServer'.format(image_url, service_name, image_token)
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         querystring = {"f": "pjson", "token": image_token}
@@ -160,7 +174,6 @@ def create_service_json(service_name, service_exists, gdb_name, md_name):
             print("failure: " + e)
 
         current_svc_json = resp.json()
-        print("current_svc_json: " + str(type(current_svc_json)))
         current_path = current_svc_json["properties"]["path"]
         new_path = update_service_path(current_path, gdb_name, md_name)
         current_svc_json["properties"]["path"] = new_path
@@ -192,6 +205,7 @@ def start_service(image_url, service_name, image_token):
 
     return resp.content
 
+# Publish or update the Image Service
 for feature in active_aois:
     service_name = feature.attributes["name"]
     match_list = gis.content.search(service_name, item_type = "Image Service")
@@ -211,9 +225,10 @@ for feature in active_aois:
             service_exists = False
     print("\n" + message)
     
+    gdb_name = service_name + "_" + datetime.utcfromtimestamp(feature.attributes["lastmoddate"] / 1000).strftime("%m_%d_%Y_%H_%M_%S")
+    md_name = service_name
+
     if service_exists:
-        gdb_name = feature_name + "_" + datetime.utcfromtimestamp(feature.attributes["lastmoddate"] / 1000).strftime("%m_%d_%Y_%H_%M_%S")
-        md_name = feature_name
         service_json = create_service_json(service_name, True, gdb_name + ".gdb", service_name)
         if "success" in str(stop_service(image_url, service_name, image_token)):
             print("Service stopped.")
@@ -225,3 +240,5 @@ for feature in active_aois:
         service_json = create_service_json(service_name, False, gdb_name + ".gdb", service_name)
         publish_image_service(service_name, service_json)
         print("New service published")
+
+print("Image Service management complete.")
