@@ -29,7 +29,9 @@ import urllib
 import json
 import csv
 import requests
-from satsearch import Search
+#from satsearch import Search
+from pystac_client import Client
+from typing import Any, Dict
 
 
 class UserCode:
@@ -126,7 +128,7 @@ class UserCode:
             fileFieldDef.append({fld_lst[1]:['Date','#','#','#']})      #AcquisitionDate
             fileFieldDef.append({fld_lst[2]:['Float','#','#','#']})     #CloudCover
             fileFieldDef.append({fld_lst[3]:['Text','#','#',180]})       #name
-            fileFieldDef.append({fld_lst[4]:['Text','#','#',180]})       #ProductID
+            fileFieldDef.append({fld_lst[4]:['Text','#','#',400]})       #ProductID
             fileFieldDef.append({fld_lst[5]:['Text','#','#',180]})      #ProductURL
             fileFieldDef.append({fld_lst[6]:['Text','#','#',180]})      #Constellation
             fileFieldDef.append({fld_lst[7]:['Text','#','#',6]})        #SRS
@@ -166,7 +168,7 @@ class UserCode:
             fileFieldDef.append({fld_lst[1]:['Date','#','#','#']})      #AcquisitionDate
             fileFieldDef.append({fld_lst[2]:['Float','#','#','#']})     #CloudCover
             fileFieldDef.append({fld_lst[3]:['Text','#','#',200]})       #ID
-            fileFieldDef.append({fld_lst[4]:['Text','#','#',90]})       #ProductID
+            fileFieldDef.append({fld_lst[4]:['Text','#','#',400]})       #ProductID
             fileFieldDef.append({fld_lst[5]:['Text','#','#',180]})      #Constellation
             fileFieldDef.append({fld_lst[6]:['Text','#','#',6]})        #SRS
             fileFieldDef.append({fld_lst[7]:['Long','#','#','#']})      #NumDate
@@ -465,11 +467,11 @@ class UserCode:
             ProductName = jsData.id
             jsonValList.append(ProductName)
 
-            Productid = jsData.properties['sentinel:product_id']
+            Productid = jsData.properties['s2:product_uri']
             jsonValList.append(Productid)
 
             #ProductURL = "http://sentinel-cogs.s3-us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/" + ProductName[4:6]+'/'+ProductName[6]+'/'+ProductName[7:9]+'/'+ProductName[10:14]+'/'+str(int(ProductName[14:16]))+'/'+ProductName+'/'
-            ProductURL = (jsData.assets['visual']['href'])[:-7]
+            ProductURL = (jsData.assets['visual'].href)[:-7]
             jsonValList.append(ProductURL)
 
             Constellation  = jsData.properties['constellation']
@@ -491,10 +493,10 @@ class UserCode:
             jsonValList.append(Tile_BB_Values)
 
 
-            Shape = jsData.assets['visual']['proj:shape'][0]
-            min_X = jsData.assets['visual']['proj:transform'][2]
-            max_Y = jsData.assets['visual']['proj:transform'][5]
-            Multipliers = jsData.assets['visual']['proj:transform'][0]
+            Shape = jsData.assets['visual'].extra_fields['proj:shape'][0]
+            min_X = jsData.assets['visual'].extra_fields['proj:transform'][2]
+            max_Y = jsData.assets['visual'].extra_fields['proj:transform'][5]
+            Multipliers = jsData.assets['visual'].extra_fields['proj:transform'][0]
 
             max_X = min_X + Shape * Multipliers
             min_Y = max_Y - Shape * Multipliers
@@ -682,24 +684,35 @@ class UserCode:
 
 
         else:
-            url = 'https://earth-search.aws.element84.com/v0/search'
-            collections=['sentinel-s2-l2a-cogs']
+            url = 'https://earth-search.aws.element84.com/v1'
+            client = Client.open(url)
+            collections='sentinel-2-l2a'
             query={'eo:cloud_cover': {'lt': float(cloudePercentage)}}
-            # dateTime = str(startDate)+"/"+str(endDate)
-            bbox = coordinateList
+            aoi_as_dict: Dict[str, Any] = {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [coordinateList[0], coordinateList[1]],
+                            [coordinateList[2], coordinateList[1]],
+                            [coordinateList[2], coordinateList[3]],
+                            [coordinateList[0], coordinateList[3]],
+                            [coordinateList[0], coordinateList[1]]
+                        ]]
+                    }
             for dateTime in datelist:
                 try:
-                    Staclist = Search(bbox=coordinateList, datetime=dateTime, collections=collections, url=url,query=query)
-                    items = Staclist.items()
+                    search = client.search(
+                                        collections = collections,
+                                        intersects = aoi_as_dict,
+                                        datetime = dateTime,
+                                        query=query
+                                    )
 
                 except Exception as exp:
                     log.Message(str(exp),2)
-
-                    
                 try:
                     log.Message(("adding to the feature class for interverl "+dateTime+"..."),log.const_general_text)
-                    for x in range(len(items)):
-                        JsonData = self.readStac(data,items[x])
+                    for item in search.items():
+                        JsonData = self.readStac(data,item)
                         if JsonData != False:
                             try:
                                 log.Message(("adding to the feature class " + JsonData[3] + "..."),log.const_general_text)
@@ -707,16 +720,9 @@ class UserCode:
 
                             except Exception as exp:
                                 log.Message(str(exp),2)
-                                                
-
-
-
                 except Exception as exp:
                         log.Message(str(exp),2)
-                    
-
-                
-            del cursor
+        del cursor
 
         field_list=['SHAPE@','AcquisitionDate','CloudCover','ID','ProductID','Constellation','SRS',"NumDate",'Q','Best','Raster','Tag']
         try:
@@ -734,7 +740,6 @@ class UserCode:
             masterFC = os.path.join(wrkSpace,"MasterTiles")
             field_list_master=['SHAPE@','AcquisitionDate','CloudCover','Name','ProductID','ProductURL','Constellation','SRS',"NumDate",'Tile_BB_Values','RasterProxy_BB_Values','Q','Best']
 
-            # DW changing this from c to z in order to verify behavior on Linux Image Server
             #cache_loc = r"Z:/mrfcache/cachingmrf/"
             cache_loc = r"C:/mrfcache/cachingmrf/"
 
