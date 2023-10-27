@@ -95,9 +95,7 @@
     },
     "portalProperties": {
      "isHosted": false,
-     "portalItems": [{
-      "type": "ImageServer"
-     }]
+     "portalItems": []
     },
     "extensions": [
      {
