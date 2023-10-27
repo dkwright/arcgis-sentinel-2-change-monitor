@@ -1443,7 +1443,7 @@ class Solutions(Base.Base):
              'fnc': executeCommand
              },
             'RRFMD':
-            {'desc': 'Remove Rasters from Mosaic ataset.',
+            {'desc': 'Remove Rasters from Mosaic dataset.',
              'fnc': executeCommand
              },
             'DMD':
