@@ -24,12 +24,12 @@ For a quicket start, clone this repository into this local path: "C:\Image_Mgmt_
     These scripts will require some variables to be set to match your ArcGIS Enterprise / Iamge Server configuration.
    
 ### A note about SCP
-02-manage-image-services.ipynb, and 02-manage-image-services.py includes a method that transfers the File GeoDataBase to a Linux File Server configured with the Image Hosting Site. Note that a Folder Datastore was configured using the Image Server Manager allow data access to the File Server. Also note that there is a server folder created on the Image Hosting site "change_monitor" that is in use to partition the Image Services created / updated by this code base. The SCP method here passes the user's id_rsa key to authenticate with the Linux File Server. If you are using a Windows host for your Image Hosting storage, please examine OpenSSH to provide SCP capabilities for Windows, or consider an alternative file transfer method.
+02-manage-image-services.ipynb, and 02-manage-image-services.py includes a method that transfers the File GeoDataBase to a Linux File Server configured with the Image Hosting Site. Note that a Folder Datastore was configured using the Image Server Manager allow data access to the File Server. Also note that there is a server folder created on the Image Hosting site "change_monitor" that is in use to partition the Image Services created / updated by this code base. The SCP method here passes the user's id_rsa key to authenticate with the Linux File Server. If you are using a Windows host for your Image Hosting storage, please examine OpenSSH to provide SCP capabilities for Windows, or consider an alternative file transfer method. Yet another laternative is to run this code on the Image Server which would altogether eliminate the need for file transfer.
 
 ## The "service_mgmt" directory 
 ### Contains a JSON template for publishing new image services:
     * rest-create-service-s2l2a-template.json
-This template was built using ArcGIS Image Server version 10.9.1 (the latest release of Image Server at the time of creating this repository), and has only been tested with version 10.9.1.
+This template was originally built using ArcGIS Image Server version 10.9.1, and has also been tested with versions 11.0, 11.1 and 11.2.
 Please note: You will need to edit some values in this JSON template before running the code."
     * "userName": "changemonitor_myorg" 
 Replace "changemon_myorg" with a username in your ArcGIS Enterprise environment with Publisher privileges. This username will be the owner of the published / modified services.
