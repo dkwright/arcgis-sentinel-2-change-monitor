@@ -78,7 +78,7 @@
 				<geographic_transform>#</geographic_transform>
 				<max_num_of_download_items>50</max_num_of_download_items>
 				<max_num_of_records_returned>2000</max_num_of_records_returned>
-				<processing_templates>Natural Color with DRA.rft.xml;Agriculture with DRA.rft.xml;Bathymetric with DRA.rft.xml;Color Infrared with DRA.rft.xml;Short-wave Infrared with DRA.rft.xml;Geology with DRA.rft.xml;Natural Color.rft.xml;Agriculture.rft.xml;Bathymetric.rft.xml;Geology.rft.xml;Short-wave Infrared.rft.xml;Color Infrared.rft.xml;NDVI Colormap.rft.xml;NDMI Colorized.rft.xml;Normalized Burn Ratio.rft.xml;Normalized Difference Built-Up Index (NDBI).rft.xml;NDVI Raw.rft.xml;NDVI - VRE only Raw.rft.xml;NDVI - with VRE Raw.rft.xml;NDWI Raw.rft.xml;NDWI - with VRE Raw.rft.xml;Scene Classification Map.rft.xml;WaterVapourMap.rft.xml;Aerosol Optical Thickness Map.rft.xml;None</processing_templates>
+				<processing_templates>Natural Color with DRA.rft.xml;Agriculture with DRA.rft.xml;Bathymetric with DRA.rft.xml;Color Infrared with DRA.rft.xml;Short-wave Infrared with DRA.rft.xml;Geology with DRA.rft.xml;Natural Color.rft.xml;Agriculture.rft.xml;Bathymetric.rft.xml;Geology.rft.xml;Short-wave Infrared.rft.xml;Color Infrared.rft.xml;NDVI Colormap.rft.xml;NDMI Colorized.rft.xml;Normalized Burn Ratio.rft.xml;Normalized Difference Built-Up Index (NDBI).rft.xml;NDVI Raw.rft.xml;NDVI - VRE only Raw.rft.xml;NDVI - with VRE Raw.rft.xml;NDWI Raw.rft.xml;NDWI - with VRE Raw.rft.xml;Aerosol Optical Thickness Map.rft.xml;None</processing_templates>
 				<default_processing_template>Natural Color with DRA.rft.xml</default_processing_template>
                 <minimum_pixel_contribution>1000</minimum_pixel_contribution>
 			</DefaultProperties>
