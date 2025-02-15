@@ -7,7 +7,7 @@ This project was presented at the Esri 2022 Imagery Summit (slides included as E
     * Share with collaborators using a Webmap, a Webapp, or ArcGIS Pro
     * Record the item guid after publishing for reference in python code listed below
 
-This project uses Mosaic Dataset Configuration Script (MDCS) which in turn makes use of Arcpy to automate creation and updating of Mosaic Datasets. Next the proejct automates publishing of image services (or updating them when already existing). The project also uses ArcGIS API for Python to conduct change analysis - differencing NDVI from the two most recent acquisitions in the Mosaic Dataset. A significant part of the MDCS content is based on prior work by Esri that was done in support of Digital Earth Africa. Details on the requirements, setup, and operation of MDCS is covered in the documentation of that repository at https://github.com/Esri/mdcs-py
+This project uses Mosaic Dataset Configuration Script (MDCS) which in turn makes use of Arcpy to automate creation and updating of Mosaic Datasets. Next the project automates publishing of image services (or updating them when already existing). The project also uses ArcGIS API for Python to conduct change analysis - differencing NDVI from the two most recent acquisitions in the Mosaic Dataset. A significant part of the MDCS content is based on prior work by Esri that was done in support of Digital Earth Africa. Details on the requirements, setup, and operation of MDCS is covered in the documentation of that repository at https://github.com/Esri/mdcs-py
 
 For a quicket start, clone this repository into this local path: "C:\Image_Mgmt_Workflows\MDCS\arcgis-sentinel-2-change-monitor"
 
@@ -24,7 +24,7 @@ For a quicket start, clone this repository into this local path: "C:\Image_Mgmt_
     These scripts will require some variables to be set to match your ArcGIS Enterprise / Iamge Server configuration.
    
 ### A note about SCP
-02-manage-image-services.ipynb, and 02-manage-image-services.py includes a method that transfers the File GeoDataBase to a Linux File Server configured with the Image Hosting Site. Note that a Folder Datastore was configured using the Image Server Manager allow data access to the File Server. Also note that there is a server folder created on the Image Hosting site "change_monitor" that is in use to partition the Image Services created / updated by this code base. The SCP method here passes the user's id_rsa key to authenticate with the Linux File Server. If you are using a Windows host for your Image Hosting storage, please examine OpenSSH to provide SCP capabilities for Windows, or consider an alternative file transfer method. Yet another laternative is to run this code on the Image Server which would altogether eliminate the need for file transfer.
+02-manage-image-services.ipynb, and 02-manage-image-services.py includes a method that transfers the File GeoDataBase (FGDB) to a Linux File Server configured with the Image Hosting Site. Note that a Folder Datastore was configured using the Image Server Manager application allowing data access to the File Server. Also note that there is a server folder created on the Image Hosting site "change_monitor" that is in use to partition the Image Services created / updated by this code base. The SCP method here passes the user's id_rsa key to authenticate with the Linux File Server. If you are using a Windows host for your Image Hosting storage, please examine OpenSSH to provide SCP capabilities for Windows, or consider an alternative file transfer method. Yet another alternative is to modify this code to create FGDB on the Image Server directly, or to create the Mosiac Dataset within an Enterprise GeoDataBase, wither of which would altogether eliminate the need for the file transfer step.
 
 ## The "service_mgmt" directory 
 ### Contains a JSON template for publishing new image services:
@@ -40,5 +40,5 @@ Replace https://cname.domain/portal/ with your actual portal URL (e.g https://re
     * "onlineResource": "**https://cname.domain**/image/services/change_monitor/MYSERVICENAME/ImageServer/WMSServer"
     
 ## Additional Requirements:
-### Access to the Sentinel-2 Data STAC catalog requires installation of the sat-search Python module
-pip install sat-search
+### Access to the Sentinel-2 Data STAC catalog requires installation of the pystac-client Python module
+pip install pystac-client
