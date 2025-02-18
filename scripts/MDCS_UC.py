@@ -477,8 +477,15 @@ class UserCode:
             Constellation  = jsData.properties['constellation']
             jsonValList.append(Constellation)
 
-            srs  = jsData.properties['proj:epsg']
-            jsonValList.append(srs)
+            
+            # Accommodating pystac library version diff of 1.12.1 / pystac-client 0.8.6
+            try:
+                srs  = jsData.properties['proj:epsg']
+                jsonValList.append(srs)
+            
+            except:
+                srs  = jsData.properties['proj:code'].split(":",1)[1]
+                jsonValList.append(srs)
 
 
 
