@@ -481,12 +481,11 @@ class UserCode:
             # Accommodating pystac library version diff of 1.12.1 / pystac-client 0.8.6
             try:
                 srs  = jsData.properties['proj:epsg']
-                jsonValList.append(srs)
             
             except:
                 srs  = jsData.properties['proj:code'].split(":",1)[1]
-                jsonValList.append(srs)
-
+            
+            jsonValList.append(srs)
 
 
             NumDate  = AcquisitionDate[0:4]+AcquisitionDate[5:7]+AcquisitionDate[8:10]
