@@ -41,5 +41,5 @@ Replace https://cname.domain/portal/ with your actual portal URL (e.g https://re
     
 ## Additional Requirements:
 ### Access to the Sentinel-2 Data STAC catalog requires installation of the pystac-client Python module
-conda install -c conda-forge pystac-client==0.8.5![Uploading image.png…]()
+conda install -c conda-forge pystac-client
 
